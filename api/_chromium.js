@@ -1,11 +1,16 @@
 import chrome from "chrome-aws-lambda";
 import puppeteer from "puppeteer-core";
 
+const USER_AGENT =
+  "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6";
+
 export async function getHTML({ url, isDev }) {
   const options = await getOptions(isDev);
   const browser = await puppeteer.launch(options);
 
   const page = await browser.newPage();
+  await page.setUserAgent(USER_AGENT);
+
   await page.goto(url);
 
   const html = await page.evaluate(() => document.documentElement.innerHTML);
