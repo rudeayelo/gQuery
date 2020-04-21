@@ -1,9 +1,8 @@
 import { ApolloServer, gql } from "apollo-server-micro";
 import cheerio from "cheerio";
-
 import { getHTML } from "./_chromium";
-
 const cors = require("micro-cors")();
+
 // const isDev = process.env.NOW_REGION === "dev1";
 const isDev = process.env.NODE_ENV === "development";
 
@@ -13,7 +12,7 @@ const typeDefs = gql`
   }
 
   type Website {
-    g(query: String!): [DOMNode]
+    node(selector: String!): [DOMNode]
   }
 
   type DOMNode {
@@ -21,8 +20,8 @@ const typeDefs = gql`
     text: String
     val: String
     attr(name: String!): String
-    first(query: String!): DOMNode
-    find(query: String!): [DOMNode]
+    first(selector: String!): DOMNode
+    find(selector: String!): [DOMNode]
   }
 `;
 
@@ -35,28 +34,28 @@ const resolvers = {
     },
   },
   Website: {
-    g: ($, { query }, _context) => {
-      return $(query).toArray();
+    node: ($, { selector }, _context) => {
+      return $(selector).toArray();
     },
   },
   DOMNode: {
-    html: (g, _args, { cheerio }) => {
-      return cheerio(g).html();
+    html: (node, _args, { cheerio }) => {
+      return cheerio(node).html();
     },
-    text: (g, _args, { cheerio }) => {
-      return cheerio(g).text();
+    text: (node, _args, { cheerio }) => {
+      return cheerio(node).text();
     },
-    val: (g, _args, { cheerio }) => {
-      return cheerio(g).val();
+    val: (node, _args, { cheerio }) => {
+      return cheerio(node).val();
     },
-    attr: (g, { name }, { cheerio }) => {
-      return cheerio(g).attr(name);
+    attr: (node, { name }, { cheerio }) => {
+      return cheerio(node).attr(name);
     },
-    find: (g, { query }, { cheerio }) => {
-      return cheerio(g).find(query).toArray();
+    find: (node, { selector }, { cheerio }) => {
+      return cheerio(node).find(selector).toArray();
     },
-    first: (g, { query }, { cheerio }) => {
-      return cheerio(g).find(query).first();
+    first: (node, { selector }, { cheerio }) => {
+      return cheerio(node).find(selector).first();
     },
   },
 };
